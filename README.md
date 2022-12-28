@@ -20,7 +20,7 @@ I only felt the gravity of what I did as the good news came. Even more so as my 
 
 While this assignment was certainly among the highlights of this semester, I'm also extremely greatful for having been chosen to be a TA for CSC 252: Computer Organization. The satisfaction of explaining new concepts to someone else and watch their Eureka moment, to me, will simply never get old. Being able to come back to one of my favorite classes, and uncover (again) the magic behind fancy circuits called "processors" is just something I can not turn down. To have had the honor to work with a great lecturer, an equally great team of teaching assistants, and having received truly heartfelt appreciation messages from my students at the end of the semester completes the cherry on top of the pie.
 
-With that being said, what better way to remember this semester by re-doing that assignment... but in Assembly?
+With that being said, what better way to remember this semester by re-doing that assignment... but in Assembly.
 
 # A note on my MIPS32 Assembly implementation
 While I have for the most part stayed true to the style guidelines in CSC 252, there are a few significant deviations. The most significant of which includes my extensive use of pseudo branch instructions, when pseudo-instructions remained banned in CSC 252 up until the very last assignment. I'm doing this in the interest of disability; however, conceptually, all of these pseudo branch instructions could be done with some combination of SLT, BEQ, and/or BNE. MOVE and LI also follow this principle, though the former can easily be translated to ADDI, and the latter with LUI and ORI.
