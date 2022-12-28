@@ -10,7 +10,11 @@ One of our assignments in CSC 345 this semester involved implementing a variety 
 
 So, off to dual-pivot Quicksort I go. 
 
-While less likely than the standard Quicksort function, the worst-case scenario of dual-pivot Quicksort is identical: given a sorted array, each iteration of the pivoting function does not evenly split the partition into 2 (or 3) smaller partitions, but instead simply shrinks the partition by a constant amount. This degrades Quicksort into an O(N^2) algorithm in the worst case. Or so I thought. Given a sorted array, the left and right pivots would have already been the minimum and maximum values, respectively. Which means that every value in the middle should fall in between our two pivots. As we iterate through the array, all that's left to do is compare an element to the previous, triggering a flag if they're not in non-decreasing order. All that's left to do is to return to the main Quicksort driver function with a set of special values, to let it know the partition is already sorted and not bother with it further!
+While less likely than the standard Quicksort function, the worst-case scenario of dual-pivot Quicksort is identical: given a sorted array, each iteration of the pivoting function does not evenly split the partition into 2 (or 3) smaller partitions, but instead simply shrinks the partition by a constant amount. This degrades Quicksort into an O(N^2) algorithm in the worst case. 
+
+Or so I thought. 
+
+Given a sorted array, the left and right pivots would have already been the minimum and maximum values, respectively. Which means that every value in the middle should fall in between our two pivots. As we iterate through the array, all that's left to do is compare an element to the previous, triggering a flag if they're not in non-decreasing order. All that's left to do is to return to the main Quicksort driver function with a set of special values, to let it know the partition is already sorted and not bother with it further!
 
 And that became my solution to sorting random arrays. Our test suites included test cases that ran our sorting algorithms on arrays of up to 10,000 integers (which, in hindsight, I don't think the input size is *that* big. Again, Quicksort is far from the only sorting algorithm we had to implement, and certainly isn't the ideal choice for different edge cases, such as mostly-sorted arrays. However, the biggest test cases were the ones with random elements, and I was more than happy to submit my version dual-pivot Quicksort as described above. 
 
