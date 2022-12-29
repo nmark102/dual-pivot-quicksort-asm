@@ -28,3 +28,6 @@ With that being said, what better way to remember this semester by re-implementi
 
 # A note on my MIPS32 Assembly implementation
 While I have for the most part stayed true to the style guidelines in CSC 252, there are a few significant deviations. The most significant of which includes my extensive use of pseudo branch instructions, when pseudo-instructions remained banned in CSC 252 up until the very last assignment. I'm doing this in the interest of disability; however, conceptually, all of these pseudo branch instructions could be done with some combination of SLT, BEQ, and/or BNE. MOVE and LI also follow this principle, though the former can easily be translated to ADDI, and the latter with LUI and ORI.
+
+# Future RISC-V Assembly Implementation
+To be done as I re-familiarize myself with RISC-V. Unlike the MIPS version, however, I plan to support the 64-bit (RV64I) and the 16-bit compressed (RVC) extensions.
