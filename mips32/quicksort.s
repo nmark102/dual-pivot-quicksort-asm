@@ -4,7 +4,8 @@
 # ENABLED FOR TESTING ONLY
 .globl partition
 
-.rodata
+# Apparently, MARS doesn't recognize the .rodata directive
+.data
 
 # For arrays (or partitions) of at most 5 elements: I've decided to default to 
 # run insertion sort on them.
@@ -16,6 +17,7 @@
 
 INSERTION_SORT_THRESHOLD:
 			.word		6
+			
 .text
 
 # void quicksort(int* arr, int size) {
@@ -76,7 +78,7 @@ partition:
 	# t2 = &(num + len - 1) - pointer to the right pivot
 	addi	$t2, $a1, -1
 	sll		$t2, $t2, 2
-	addiu	$t2, $t2, $a0
+	addu	$t2, $t2, $a0
 
 	# Load and swap the pivots as needed
 	# t8 = num[0]
