@@ -90,10 +90,12 @@ partition:
 	# Swap the two pivots if t8 > t9
 	ble		$t8, $t9, PIVOT_SWAP_COMPLETE
 
+	# First swap the two pivots in the "pivot" registers (t8, t9)
 	move	$t5, $t8
 	move	$t8, $t9
 	move	$t9, $t5
 	
+	# Re-sync the pivots in memory
 	sw		$t8, 0($t0)
 	sw		$t9, 0($t2)
 
@@ -149,22 +151,23 @@ CHECK_BETWEEN_PIVOTS:
 	bgt		$t3, $t9, GREATER_THAN_RIGHT_PIVOT
 
 	# Compare cur to the previous value
-	ble		$t3, $t4, BETWEEN_PIVOTS_RESET_SORTED_FLAG
+	# if arr[iterator] < arr[iterator - 1], the array is not sorted
+	blt		$t3, $t4, BETWEEN_PIVOTS_RESET_SORTED_FLAG
 
 	li		$t7, 0
 
 BETWEEN_PIVOTS_RESET_SORTED_FLAG:
 	# Increment iterator only
-	addi	$t1, $t1, 4
+	addiu	$t1, $t1, 4
 
-	# Again, back up num[iterator] into t4 and jump back to the beginning of the loop
+	# Again, back up arr[iterator] into t4 and jump back to the beginning of the loop
 	move	$t4, $t3
 	j 		PIVOT_LOOP
 
 GREATER_THAN_RIGHT_PIVOT:
-	# Swap iterator with the right pivot index
-	sw		$t9, 0($t2)
-	sw		$t3, 0($t1)
+	# Swap arr[iterator] with right pivot
+	sw		$t9, 0($t1)
+	sw		$t3, 0($t2)
 
 	# Decrement the right pivot
 	addiu	$t2, $t2, -4
@@ -188,6 +191,7 @@ PARTITION_RETURN_POINTERS:
 	
 	# Swap right pivot with arr[hi]
 
+
 	# Re-translate pivot pointers into indices
 	subu	$v0, $t0, $a0
 	sra		$v0, $v0, 2
@@ -200,7 +204,7 @@ PARTITION_RETURN_POINTERS:
 PARTITION_IS_SORTED:
 	li		$v0, -1
 	li		$v1, -1
-	j 		partition_RET
+	
 
 partition_RET:
 	lw		$ra, 0($sp)

@@ -1,17 +1,19 @@
 .globl print_array
 .globl check_sorted_array
 
-.data
+.text
 
 print_array:
-    addiu   $sp, $sp, -24
+    addiu   $sp, $sp, -12
 
-    sw      $a1, 20($sp)
-    sw      $a0, 16($sp)
-    sw      $ra, 12($sp)
-    sw      $s2,  8($sp)
-    sw      $s1,  4($sp)
-    sw      $s0,  0($sp)
+    sw      $a1, 8($sp)
+    sw      $a0, 4($sp)
+    sw      $ra, 0($sp)
+
+    addiu   $sp, $sp, -12
+    sw      $s2, 8($sp)
+    sw      $s1, 4($sp)
+    sw      $s0, 0($sp)
 
     addi    $s0, $a0, 0
     addi    $s1, $zero, 0
@@ -34,12 +36,15 @@ print_array_LOOP:
     j       print_array_LOOP
 
 print_array_EXIT:
-    lw      $ra, 12($sp)
-    lw      $s2,  8($sp)
-    lw      $s1,  4($sp)
-    lw      $s0,  0($sp)
+    # Restore saved registers
+    lw      $s2, 8($sp)
+    lw      $s1, 4($sp)
+    lw      $s0, 0($sp)
+    addiu   $sp, $sp, 12
 
-    addiu   $sp, $sp, 24
+    # Restore return address
+    lw      $ra, 0($sp)
+    addiu   $sp, $sp, 12
     jr      $ra
 
 # NOTICE: Syscalls 30 and higher are supported by MARS only, and are not supported by SPIM.
