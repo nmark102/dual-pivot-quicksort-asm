@@ -90,6 +90,9 @@ partition:
 	# Swap the two pivots if t8 > t9
 	ble		$t8, $t9, PIVOT_SWAP_COMPLETE
 
+	# If the left pivot is greater than the right pivot:
+	# (i.e. if arr[0] > arr[len - 1]:
+
 	# First swap the two pivots in the "pivot" registers (t8, t9)
 	move	$t5, $t8
 	move	$t8, $t9
@@ -122,13 +125,14 @@ PIVOT_SWAP_COMPLETE:
 	#		else if arr[iterator] 
 
 PIVOT_LOOP:
+	# Break if iterator > right pivot
 	bgt		$t1, $t2, PARTITION_RETURN_POINTERS
 
 	# t3: num[iterator]
 	lw		$t3, 0($t1)
 
-	# if num[iterator] < leftPivot:
-	# set sorted flag to false
+	# if num[iterator] >= leftPivot, check whether the current value
+	# will end up in the middle partition
 	bge		$t3, $t8 CHECK_BETWEEN_PIVOTS
 
 	# If we get here: num[iterator] < leftPivot
@@ -136,9 +140,11 @@ PIVOT_LOOP:
 	li		$t7, 0
 
 	# Swap num[iterator] with leftPivot
-	sw		$t8, 0($t1)
-	sw		$t3, 0($t0)
+	lw		$t5, 0($t0)
 
+	sw		$t3, 0($t0)
+	sw		$t5, 0($t1)
+	
 	# Increment iterator and leftPivot
 	addiu	$t1, $t1, 4
 	addiu	$t0, $t0, 4
@@ -148,10 +154,11 @@ PIVOT_LOOP:
 	j 		PIVOT_LOOP
 
 CHECK_BETWEEN_PIVOTS:
+	# If arr[iterator] > rightPivot, it should end up in the right partition
 	bgt		$t3, $t9, GREATER_THAN_RIGHT_PIVOT
 
 	# Compare cur to the previous value
-	# if arr[iterator] < arr[iterator - 1], the array is not sorted
+	# if arr[iterator] < arr[iterator - 1], set the sorted flag to false
 	blt		$t3, $t4, BETWEEN_PIVOTS_RESET_SORTED_FLAG
 
 	li		$t7, 0
@@ -166,8 +173,10 @@ BETWEEN_PIVOTS_RESET_SORTED_FLAG:
 
 GREATER_THAN_RIGHT_PIVOT:
 	# Swap arr[iterator] with right pivot
-	sw		$t9, 0($t1)
+	lw		$t5, 0($t2)
+
 	sw		$t3, 0($t2)
+	sw		$t5, 0($t1)
 
 	# Decrement the right pivot
 	addiu	$t2, $t2, -4
@@ -187,10 +196,24 @@ PARTITION_RETURN_POINTERS:
 	addiu	$t2, $t2, 4
 
 	# Swap left pivot with arr[lo]
+	lw		$t3, 0($a0)
 
+	sw		$t8, 0($a0)
+	sw		$t3, 0($t0)
 	
 	# Swap right pivot with arr[hi]
+	
+	# t8: pointer to arr[length - 1]
+	addi	$t8, $a1, -1
+	sll		$t8, $t8, 2
+	addu	$t8, $t8, $a0
 
+	# t7: arr[length - 1]
+	lw		$t7, 0($t8)
+	
+	# Now, do the actual swap
+	sw		$t9, 0($t8)
+	sw		$t7, 0($t2)
 
 	# Re-translate pivot pointers into indices
 	subu	$v0, $t0, $a0
