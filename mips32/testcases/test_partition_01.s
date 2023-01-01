@@ -1,5 +1,3 @@
-.globl main
-
 .data
 buffer:
             .word 4
@@ -18,6 +16,7 @@ buffer_size:
 pivots_msg:
             .asciiz "PIVOTS:\n"
 
+.globl main
 .text
 main:
     # Call quicksort
@@ -64,25 +63,7 @@ main:
     addi    $v0, $zero, 11
     syscall
 
-    # Verify that the array is indeed sorted
-    # NOTE: Temporarily disabled while I check the partition function
-    # la      $a0, buffer
-
-    # la      $a1, buffer_size
-    # lw      $a1, 0($a1)
-
-    # jal     check_sorted_array
-
-    # beqz    $v0, ARRAY_IS_SORTED
-
-ARRAY_IS_SORTED:
-    # If array is sorted: Exit normally
+    # Exit
     li      $v0, 10
-    syscall
-
-ARRAY_NOT_SORTED:
-    # If array is not sorted: Exit with error code 1
-    li      $v0, 17
-    li      $a0, 1
     syscall
 
