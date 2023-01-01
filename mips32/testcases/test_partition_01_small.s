@@ -63,7 +63,6 @@ main:
     syscall
 
     # Verify that the array is indeed sorted
-    # NOTE: Temporarily disabled while I check the partition function
     # la      $a0, buffer
 
     # la      $a1, buffer_size
