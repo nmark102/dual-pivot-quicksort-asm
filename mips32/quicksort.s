@@ -57,6 +57,8 @@ quicksort_RET:
 # t3: arr[iterator]
 # t4: arr[iterator - 1]
 
+# t5: temporary register for miscellaneous purposes
+
 # t7: array is sorted flag
 
 # t8: value of left pivot
@@ -72,26 +74,26 @@ partition:
 	ble		$a1, $t0, PARTITION_IS_SORTED
 
 	# Set up the pivots
-	# t0 = &num				- pointer to the left pivot
+	# t0 = &arr				- pointer to the left pivot
 	move	$t0, $a0
 
-	# t2 = &(num + len - 1) - pointer to the right pivot
+	# t2 = &(arr + len - 1) - pointer to the right pivot
 	addi	$t2, $a1, -1
 	sll		$t2, $t2, 2
 	addu	$t2, $t2, $a0
 
 	# Load and swap the pivots as needed
-	# t8 = num[0]
+	# t8 = arr[0]
 	lw		$t8, 0($t0)
 	
-	# t9 = num[len - 1]
+	# t9 = arr[len - 1]
 	lw		$t9, 0($t2)
 
 	# Swap the two pivots if t8 > t9
 	ble		$t8, $t9, PIVOT_SWAP_COMPLETE
 
 	# If the left pivot is greater than the right pivot:
-	# (i.e. if arr[0] > arr[len - 1]:
+	# (i.e. if arr[0] > arr[len - 1]):
 
 	# First swap the two pivots in the "pivot" registers (t8, t9)
 	move	$t5, $t8
@@ -103,58 +105,52 @@ partition:
 	sw		$t9, 0($t2)
 
 PIVOT_SWAP_COMPLETE:
-	# t0 = &num[1]			- "low" pointer
+	# t0 = &arr[1]			- "low" pointer
 	addiu	$t0, $t0, 4
-	# t1 = &num[1]			- "mid" pointer
+	# t1 = &arr[1]			- "mid" pointer
 	move	$t1, $t0
-	# t2 = &num[len - 2]	- "high" pointer
+	# t2 = &arr[len - 2]	- "high" pointer
 	addiu	$t2, $t2, -4
 
-	# t4: num[iterator - 1] = value of left pivot
+	# t4: arr[iterator - 1]
+	# = value of the left pivot, for the first iteration
 	move	$t4, $t8
 
 	# t7 = "partition is sorted" flag
 	li		$t7, 1
 
-	# while iterator <= hi: 
-	# 		if arr[iterator] < arr[leftPivot]:
-	#			sorted = false
-	#			++iterator
-	# 			++leftPivot
-	#
-	#		else if arr[iterator] 
 
 PIVOT_LOOP:
-	# Break if iterator > right pivot
+	# Break if iterator > rightPivotIndex
 	bgt		$t1, $t2, PARTITION_RETURN_POINTERS
 
-	# t3: num[iterator]
+	# t3: arr[iterator]
 	lw		$t3, 0($t1)
 
-	# if num[iterator] >= leftPivot, check whether the current value
+	# if arr[iterator] >= left pivot, check whether the current value
 	# will end up in the middle partition
 	bge		$t3, $t8 CHECK_BETWEEN_PIVOTS
 
-	# If we get here: num[iterator] < leftPivot
+	# If we get here: arr[iterator] < left pivot
 	# Set the "sorted" flag to false
 	li		$t7, 0
 
-	# Swap num[iterator] with leftPivot
+	# Swap arr[iterator] with arr[leftPivotIndex]
 	lw		$t5, 0($t0)
 
 	sw		$t3, 0($t0)
 	sw		$t5, 0($t1)
 	
-	# Increment iterator and leftPivot
+	# Increment iterator and leftPivotIndex
 	addiu	$t1, $t1, 4
 	addiu	$t0, $t0, 4
 
-	# Copy num[iterator] into num[iterator - 1]
+	# Copy arr[iterator] into arr[iterator - 1]
 	move	$t4, $t3
 	j 		PIVOT_LOOP
 
 CHECK_BETWEEN_PIVOTS:
-	# If arr[iterator] > rightPivot, it should end up in the right partition
+	# If arr[iterator] > right pivot, it should end up in the right partition
 	bgt		$t3, $t9, GREATER_THAN_RIGHT_PIVOT
 
 	# Compare cur to the previous value
@@ -184,14 +180,14 @@ GREATER_THAN_RIGHT_PIVOT:
 	# Set the sorted flag to false
 	li		$t7, 0
 
-	# Again, back up num[iterator] into t4 and jump back to the beginning of the loop
+	# Again, back up arr[iterator] into t4 and jump back to the beginning of the loop
 	move	$t4, $t3
 	j 		PIVOT_LOOP
 
 PARTITION_RETURN_POINTERS: 
 	bnez	$t7, PARTITION_IS_SORTED
 
-	# Increment the left pointer and decrement the right pointer
+	# decrement leftPivotIndex and increment rightPivotIndex
 	addiu	$t0, $t0, -4
 	addiu	$t2, $t2, 4
 
@@ -203,22 +199,28 @@ PARTITION_RETURN_POINTERS:
 	# Load arr[leftPivotIndex]
 	lw		$t5, 0($t0)
 
+	# Store left pivot at arr[leftPivotIndex]
 	sw		$t8, 0($t0)
+
+	# Store arr[leftPivotIndex] at arr[lo]
 	sw		$t5, 0($a0)
+
 
 	# Swap right pivot with arr[hi]
 	
-	# t8: pointer to arr[length - 1]
-	addi	$t8, $a1, -1
-	sll		$t8, $t8, 2
-	addu	$t8, $t8, $a0
+	# t8: &arr[len - 1] = &arr[hi]
+	addiu	$t3, $a1, -1
+	sll		$t3, $t3, 2
+	addu	$t3, $t3, $a0
 
-	# t7: arr[length - 1]
-	lw		$t7, 0($t8)
+	# t5: arr[hi]
+	lw		$t5, 0($t2)
 	
-	# Now, do the actual swap
-	sw		$t9, 0($t8)
-	sw		$t7, 0($t2)
+	# Store right pivot at arr[rightPivotIndex]
+	sw		$t9, 0($t2)
+
+	# Store arr[rightPivotIndex] at arr[hi]
+	sw		$t5, 0($t3)
 
 	# Re-translate pivot pointers into indices
 	subu	$v0, $t0, $a0
@@ -229,11 +231,13 @@ PARTITION_RETURN_POINTERS:
 
 	j 		partition_RET
 
+# If the "array is sorted" flag is still true by the end of the pivoting loop:
+# Set the pivot indices to this special flag (-1, -1)
 PARTITION_IS_SORTED:
 	li		$v0, -1
 	li		$v1, -1
 	
-
+# Restore the return address and return
 partition_RET:
 	lw		$ra, 0($sp)
 	addiu	$sp, $sp, 4
