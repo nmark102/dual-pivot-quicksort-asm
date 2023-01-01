@@ -196,11 +196,16 @@ PARTITION_RETURN_POINTERS:
 	addiu	$t2, $t2, 4
 
 	# Swap left pivot with arr[lo]
-	lw		$t3, 0($a0)
+	# a0: &arr[lo]
+	# t0: &arr[leftPivotIndex]
+	# t8: left pivot
 
-	sw		$t8, 0($a0)
-	sw		$t3, 0($t0)
-	
+	# Load arr[leftPivotIndex]
+	lw		$t5, 0($t0)
+
+	sw		$t8, 0($t0)
+	sw		$t5, 0($a0)
+
 	# Swap right pivot with arr[hi]
 	
 	# t8: pointer to arr[length - 1]
