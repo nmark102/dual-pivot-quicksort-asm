@@ -20,7 +20,7 @@ INSERTION_SORT_THRESHOLD:
 			
 .text
 
-# void quicksort(int* arr, int size) {
+# void quicksort(int* arr, int size)
 quicksort:
 	addiu	$sp, $sp, -16
 	sw		$a1, 12($sp)
@@ -30,24 +30,117 @@ quicksort:
 
 	addiu	$fp, $sp, 12
 
-	# TODO: Implement defaulting to insertion sort for small arrays
+	# If the partition is at most 5 elements: call insertion sort
+	la		$t0, INSERTION_SORT_THRESHOLD
+	lw		$t0, 0($t0)
 
+	# Otherwise, call partition
+	# TODO: There are consecutive control transfer instructions. 
+	# Add a delay slot in between them.
+	blt		$a1, $t0, quicksort_PARTITION
+	jal		insertionSort
+
+	j		quicksort_RET
+
+	# Otherwise, partition the array and recurse
+quicksort_PARTITION:
 	jal		partition
 
 	# If partition returns (-1, -1), the partition is already sorted!
 	li		$t9, -1
 	beq		$v0, $t9, quicksort_RET
+	
+	# Save the pivot indices
+	# The pointer to the start of the partition, as well as its size,
+	# is already saved in the prologue
+	addiu	$sp, $sp, -8
+	sw		$v1, 4($sp)
+	sw		$v0, 0($sp)
+	
+	# Recursively call quicksort on the left partition
+	# Address of left partition = address of the original partition
+	# Size of left partition = left pivot index
+	lw		$a0, -4($fp)
+	move	$a1, $v0
+	jal		quicksort
 
-	# TODO: Implement recursive call to smaller partitions
-		
+	# Recursively call quicksort on the middle partition
+	# Address of middle partition = &(arr + left pivot index + 1)
+	# size of middle partition = (right pivot index - left pivot index - 1)
+	
+	# Calculate address to middle partition
+	# First restore the pointer to the start of the array
+	lw		$a0, -4($fp)
+
+	# Offset = 4 * (left pivot index + 1)
+	lw		$t0, 0($sp)
+	addi	$t0, $t0, 1
+	sll		$t0, $t0, 2
+
+	# Add offset to the start of the array, to obtain the start of the middle partition
+	addu	$a0, $a0, $t0
+
+	# Calculate size of middle partition
+	# First reload left and right pivot indices into t0 and t1, respectively
+	lw		$t0, 0($sp)
+	lw		$t1, 4($sp)
+
+	# Calculate right pivot - left pivot - 1 and store the result in a1
+	sub		$a1, $t1, $t0
+	addi	$a1, $a1, -1
+
+	jal		quicksort
+	
+	# Recursively call quicksort on the right partition
+	# Address of right partition = &(arr + right pivot index + 1)
+	# size of middle partition = size of array - right pivot index - 1
+
+	# Calculate address to the right partition
+	# First restore address to the start of the array
+	lw		$a0, -4($fp)
+
+	# Offset = 4 * (right pivot index + 1)
+	lw		$t0, 4($sp)
+
+	# Copy the right pivot index into t8 - this will be useful later
+	move	$t8, $t0
+
+	addi	$t0, $t0, 1
+	sll		$t0, $t0, 2
+
+	# Add offset to get the start of the right partition
+	addu	$a0, $a0, $t0
+
+	# Restore size of original array
+	lw		$t9, 0($fp)
+
+	# Calculate size of right partition and store in a1
+	sub		$a1, $t9, $t8
+	addi	$a1, $a1, -1
+
+	# Call quicksort on the right partition
+	jal		quicksort
+
+	# Discard the stack space we used to preserve the pivot indices
+	addiu	$sp, $sp, 8
+
 quicksort_RET:
+	# First discard the stack frame we used to preserve the pivot indices
+	# TODO: why does this cause the stack frame to be incorrectly restored?
+	
+
+	# Restore old ra and fp from the stack frame
 	lw		$ra, 4($sp)
 	lw		$fp, 0($sp)
+
+	# Free the stack frame and return
 	addiu	$sp, $sp, 16
 	jr		$ra
 
 
-# void partition(int* arr, int size)
+# int partition(int* arr, int size)
+# NOTE: Not truly representative of the behavior of the "partition" function below.
+# 		See the README file for further details.
 
 # REGISTERS:
 # t0: "low" pointer
@@ -243,13 +336,12 @@ partition_RET:
 	addiu	$sp, $sp, 4
 	jr		$ra
 
+# void insertionSort(int* arr, int size)
 insertionSort:
 	addiu	$sp, $sp, -4
 	sw		$ra, 0($sp)
 
-# while(len >= 2) {
-# 	for(int i = 0; i < len - 1; ++i) {
-# 		
+	
 insertionSort_LOOP:
 	addi	$a1, $a1, -1
 	blez	$a1, insertionSort_RET
