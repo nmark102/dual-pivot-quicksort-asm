@@ -49,16 +49,14 @@ quicksort_PARTITION:
 	# If partition returns (-1, -1), the partition is already sorted!
 	li		$t9, -1
 	beq		$v0, $t9, quicksort_RET
-
-	# TODO: Implement recursive call to smaller partitions
 	
 	# Save the pivot indices
 	# The pointer to the start of the partition, as well as its size,
 	# is already saved in the prologue
 	addiu	$sp, $sp, -8
-	sw		$v0, 0($sp)
 	sw		$v1, 4($sp)
-
+	sw		$v0, 0($sp)
+	
 	# Recursively call quicksort on the left partition
 	# Address of left partition = address of the original partition
 	# Size of left partition = left pivot index
@@ -123,9 +121,13 @@ quicksort_PARTITION:
 	# Call quicksort on the right partition
 	jal		quicksort
 
+	# Discard the stack space we used to preserve the pivot indices
+	addiu	$sp, $sp, 8
+
 quicksort_RET:
 	# First discard the stack frame we used to preserve the pivot indices
-	addiu	$sp, $sp, 8
+	# TODO: why does this cause the stack frame to be incorrectly restored?
+	
 
 	# Restore old ra and fp from the stack frame
 	lw		$ra, 4($sp)
