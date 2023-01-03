@@ -27,6 +27,8 @@ While this assignment was certainly among the highlights of this semester, I'm a
 With that being said, what better way to remember this semester by re-implementing dual-pivot Quicksort, with sorted partition detection... in Assembly.
 
 # A note on my MIPS32 Assembly implementation
+__January 3, 2023 update:__ Apparently, the official MIPS specifications require a branch/jump delay slot. The version I currently have assumes no branch/jump delay slots are needed, as MARS does not enable delayed branching by default. Tweaking my current code to accommodate the branch/jump delay slots won't be too difficult, but nonetheless could turn into a headache. We'll see what comes out of it.
+
 While I have for the most part stayed true to the style guidelines in CSC 252, there are a few significant deviations. The most significant of which includes my extensive use of pseudo branch instructions, when pseudo-instructions remained banned in CSC 252 up until the very last assignment. I'm doing this in the interest of disability; however, conceptually, all of these pseudo branch instructions could be done with some combination of SLT, BEQ, and/or BNE. MOVE and LI also follow this principle, though the former can easily be translated to ADDI, and the latter with LUI and ORI.
 
 # Future RISC-V Assembly Implementation
